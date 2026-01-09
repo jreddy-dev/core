@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 import os
 from uuid import uuid4
@@ -29,6 +29,31 @@ async def upload_video(experiment_id: str, file: UploadFile = File(...)):
     session.close()
 
     return JSONResponse(status_code=201, content={"id": video_id, "filename": filename, "status": "uploaded"})
+
+
+@router.post("/{video_id}/process")
+def process_video_endpoint(video_id: str, background_tasks: BackgroundTasks):
+    # Enqueue background processing
+    background_tasks.add_task(process_video_task, video_id)
+    return JSONResponse(status_code=202, content={"video_id": video_id, "status": "processing"})
+
+
+def process_video_task(video_id: str):
+    try:
+        from ..workers.process_video import process_video
+        process_video(video_id)
+    except Exception as e:
+        print("Processing error:", e)
+
+
+@router.post("/{video_id}/synthesize")
+def synthesize(video_id: str):
+    try:
+        from ..workers.process_video import synthesize_protocol
+        md = synthesize_protocol(video_id)
+        return JSONResponse(status_code=200, content={"protocol_markdown": md})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/{video_id}")

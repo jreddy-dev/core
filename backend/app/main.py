@@ -1,6 +1,7 @@
 from fastapi import FastAPI
-from .api import experiments, videos
+from .api import experiments, videos, projects, protocols
 from .db import Base, engine
+import models_extra
 
 app = FastAPI(title="LabFlow Prototype")
 
@@ -9,6 +10,8 @@ Base.metadata.create_all(bind=engine)
 
 app.include_router(experiments.router, prefix="/api")
 app.include_router(videos.router, prefix="/api")
+app.include_router(projects.router, prefix="/api")
+app.include_router(protocols.router, prefix="/api")
 
 
 @app.get("/health")
