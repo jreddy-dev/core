@@ -62,3 +62,14 @@ class Link(Base):
     id = Column(String, primary_key=True, default=gen_uuid)
     from_node_id = Column(String, ForeignKey("nodes.id"))
     to_node_id = Column(String, ForeignKey("nodes.id"))
+
+
+class LabeledCorrection(Base):
+    __tablename__ = "labeled_corrections"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    video_id = Column(String, ForeignKey("videos.id"))
+    experiment_id = Column(String, ForeignKey("experiments.id"))
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    corrected_json = Column(JSON)
+    notes = Column(String)
+    created_at = Column(DateTime, server_default=func.now())
