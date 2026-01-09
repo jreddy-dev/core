@@ -12,6 +12,10 @@ docker-compose up --build
 # Frontend: http://localhost:5173
 ```
 
+Frontend dev notes:
+- New UI uses Chakra UI and React Markdown. After pulling changes run `npm install` in `frontend/` (or let Docker build do it).
+- Use `http://localhost:5173` to access the app.
+
 Testing & demo data
 
 - Seed the DB with a demo project & experiment:
