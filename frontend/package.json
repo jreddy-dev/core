@@ -1,0 +1,25 @@
+{
+  "name": "labflow-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-flow-renderer": "11.3.0",
+    "@chakra-ui/react": "2.7.0",
+    "@emotion/react": "11.11.0",
+    "@emotion/styled": "11.11.0",
+    "framer-motion": "10.12.16",
+    "react-markdown": "8.0.7"
+  },
+  "devDependencies": {
+    "vite": "5.6.13",
+    "@vitejs/plugin-react": "4.0.5",
+    "typescript": "5.2.2"
+  }
+}
