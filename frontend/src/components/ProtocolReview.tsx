@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
+import { Box, Input, Button, VStack, HStack, Text, Textarea } from '@chakra-ui/react'
+import ReactMarkdown from 'react-markdown'
 
 export default function ProtocolReview() {
   const [videoId, setVideoId] = useState('')
   const [protocol, setProtocol] = useState<any | null>(null)
   const [editingSteps, setEditingSteps] = useState<any[]>([])
   const [experimentId, setExperimentId] = useState('demo-experiment')
+  const [previewMode, setPreviewMode] = useState(false)
 
   async function load() {
     if (!videoId) return
@@ -32,30 +35,40 @@ export default function ProtocolReview() {
     const r = await fetch('/api/labels/correction', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ video_id: videoId, experiment_id: experimentId, corrected_protocol: corrected, corrected_markdown: md }) })
     if (r.ok) {
       const j = await r.json()
-      alert('Saved correction: ' + j.id)
+      alert('Saved correction: ' + j.protocol_version_id)
     } else {
       alert('Save failed')
     }
   }
 
   return (
-    <div>
-      <h3>Protocol Review</h3>
-      <input placeholder="video id" value={videoId} onChange={e => setVideoId(e.target.value)} style={{ width: '100%', marginBottom: 8 }} />
-      <button onClick={load} disabled={!videoId}>Load Structured Protocol</button>
+    <Box mt={4}>
+      <Text fontWeight="bold">Protocol Review</Text>
+      <Input placeholder="video id" value={videoId} onChange={e => setVideoId(e.target.value)} mt={2} />
+      <HStack mt={2}>
+        <Button size="sm" onClick={load} isDisabled={!videoId}>Load Structured Protocol</Button>
+        <Button size="sm" variant="ghost" onClick={() => setPreviewMode(!previewMode)}>{previewMode ? 'Edit' : 'Preview'}</Button>
+      </HStack>
 
-      {editingSteps.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <h4>Steps</h4>
-          {editingSteps.map((s, idx) => (
-            <div key={idx} style={{ marginBottom: 8, padding: 8, border: '1px solid #eee' }}>
-              <input value={s.action} onChange={e => updateStep(idx, 'action', e.target.value)} style={{ width: '100%', marginBottom: 6 }} />
-              <textarea value={s.details} onChange={e => updateStep(idx, 'details', e.target.value)} rows={3} style={{ width: '100%' }} />
-            </div>
-          ))}
-          <button onClick={saveCorrections}>Save Corrections</button>
-        </div>
+      {editingSteps.length > 0 && !previewMode && (
+        <Box mt={3}>
+          <VStack spacing={3} align="stretch">
+            {editingSteps.map((s, idx) => (
+              <Box key={idx} p={3} borderWidth={1} borderRadius="md">
+                <Input value={s.action} onChange={e => updateStep(idx, 'action', e.target.value)} mb={2} />
+                <Textarea value={s.details} onChange={e => updateStep(idx, 'details', e.target.value)} rows={3} />
+              </Box>
+            ))}
+            <Button onClick={saveCorrections}>Save Corrections</Button>
+          </VStack>
+        </Box>
       )}
-    </div>
+
+      {previewMode && editingSteps.length > 0 && (
+        <Box mt={3} borderWidth={1} p={3} borderRadius="md">
+          <ReactMarkdown>{'# Protocol\n\n' + editingSteps.map((s, i) => `${i+1}. **${s.action}** - ${s.details}`).join('\n')}</ReactMarkdown>
+        </Box>
+      )}
+    </Box>
   )
 }
