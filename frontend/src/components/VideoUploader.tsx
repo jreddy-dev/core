@@ -15,7 +15,27 @@ export default function VideoUploader() {
     })
     if (res.ok) {
       const j = await res.json()
-      setStatus(JSON.stringify(j))
+      setUploadId(j.id)
+      setStatus(`uploaded (id=${j.id})`)
+
+      // poll status
+      const poll = async () => {
+        try {
+          const r = await fetch(`/api/videos/${j.id}`)
+          if (r.ok) {
+            const data = await r.json()
+            setStatus(`status: ${data.status}`)
+            if (data.status === 'processed' || data.status === 'failed') return
+            setTimeout(poll, 2000)
+          } else {
+            setStatus('Status fetch failed')
+          }
+        } catch (e) {
+          setStatus('Status fetch error')
+        }
+      }
+      poll()
+
     } else {
       setStatus('Upload failed')
     }

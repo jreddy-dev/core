@@ -12,7 +12,7 @@ os.makedirs(VIDEO_DIR, exist_ok=True)
 
 
 @router.post("/{experiment_id}")
-async def upload_video(experiment_id: str, file: UploadFile = File(...)):
+async def upload_video(experiment_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...)):
     # Save file
     video_id = str(uuid4())
     filename = f"{video_id}_{file.filename}"
@@ -27,6 +27,9 @@ async def upload_video(experiment_id: str, file: UploadFile = File(...)):
     session.commit()
     session.refresh(v)
     session.close()
+
+    # enqueue background processing automatically
+    background_tasks.add_task(process_video_task, video_id)
 
     return JSONResponse(status_code=201, content={"id": video_id, "filename": filename, "status": "uploaded"})
 
