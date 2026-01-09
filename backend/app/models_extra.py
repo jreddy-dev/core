@@ -16,6 +16,7 @@ class ProtocolVersion(Base):
     content_markdown = Column(String)
     generated_by_video_id = Column(String, ForeignKey("videos.id"), nullable=True)
     confidence_score = Column(Integer)
+    created_at = Column(DateTime, server_default=func.now())
 
 
 class Reagent(Base):
