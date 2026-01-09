@@ -63,31 +63,41 @@ def synthesize_protocol(video_id: str):
         raise RuntimeError("video not found")
     pr = session.query(ProcessingResult).filter(ProcessingResult.video_id == video_id).order_by(ProcessingResult.created_at.desc()).first()
     transcript = ""
+    events = {}
     if pr and pr.transcripts:
         for s in pr.transcripts.get("segments", []):
             transcript += s.get("text", "") + "\n"
+    if pr:
+        events = {"actions": pr.actions or [], "detections": pr.detections or {}, "ocr": pr.ocr or {}}
 
-    # Use OpenAI if configured
-    protocol_md = ""
-    if openai is not None and os.getenv("OPENAI_API_KEY"):
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-        prompt = f"Extract a stepwise protocol from the following transcript. Output markdown with numbered steps.\n\n{transcript}\n\nProtocol:" 
-        try:
-            resp = openai.Completion.create(
-                engine="text-davinci-003",
-                prompt=prompt,
-                max_tokens=400,
-                temperature=0.2,
-            )
-            protocol_md = resp.choices[0].text.strip()
-        except Exception:
-            protocol_md = "(OpenAI request failed)\n\n" + transcript[:500]
-    else:
-        # fallback: naive protocol generation
-        protocol_md = "# Generated protocol (naive)\n\n"
-        for i, line in enumerate(transcript.split('\n')):
-            if line.strip():
-                protocol_md += f"{i+1}. {line.strip()}\n"
+    # structured synthesis via llm helper
+    try:
+        from . import llm
+        structured = llm.synthesize_structured(transcript, events)
+        # render markdown summary for backward compatibility
+        md = "# Generated protocol (structured)\n\n"
+        for st in structured.get('steps', []):
+            md += f"{st.get('step_number')}. {st.get('action')}\n"
+        session.close()
+        return md
+    except Exception:
+        # fallback to older method
+        session.close()
+        return "# Generated protocol (naive)\n\n" + transcript[:1000]
 
-    session.close()
-    return protocol_md
+
+def synthesize_structured(video_id: str):
+    session = SessionLocal()
+    pr = session.query(ProcessingResult).filter(ProcessingResult.video_id == video_id).order_by(ProcessingResult.created_at.desc()).first()
+    transcript = ""
+    events = {}
+    if pr and pr.transcripts:
+        for s in pr.transcripts.get("segments", []):
+            transcript += s.get("text", "") + "\n"
+    if pr:
+        events = {"actions": pr.actions or [], "detections": pr.detections or {}, "ocr": pr.ocr or {}}
+    try:
+        from . import llm
+        return llm.synthesize_structured(transcript, events)
+    except Exception:
+        return {"steps": [], "reagents": [], "equipment": [], "assumptions": []}

@@ -2,6 +2,7 @@ import React from 'react'
 import VideoUploader from './components/VideoUploader'
 import Flowchart from './components/Flowchart'
 import ExperimentView from './components/ExperimentView'
+import ProtocolReview from './components/ProtocolReview'
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <div style={{ width: 360 }}>
           <VideoUploader />
           <ExperimentView />
+          <ProtocolReview />
         </div>
       </div>
     </div>

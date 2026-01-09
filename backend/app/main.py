@@ -12,8 +12,9 @@ app.include_router(experiments.router, prefix="/api")
 app.include_router(videos.router, prefix="/api")
 app.include_router(projects.router, prefix="/api")
 app.include_router(protocols.router, prefix="/api")
-from .api import downloads
+from .api import downloads, labels
 app.include_router(downloads.router, prefix="/api")
+app.include_router(labels.router, prefix="/api")
 
 
 @app.get("/health")
