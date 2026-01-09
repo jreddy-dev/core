@@ -1,0 +1,20 @@
+{
+  "name": "labflow-frontend",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-flow-renderer": "11.3.0"
+  },
+  "devDependencies": {
+    "vite": "5.6.13",
+    "@vitejs/plugin-react": "4.0.5",
+    "typescript": "5.2.2"
+  }
+}
