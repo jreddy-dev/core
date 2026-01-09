@@ -15,5 +15,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-      - name: Lint
-        run: echo "placeholder for tests/lint"
+      - name: Run backend tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest
+          pytest backend/tests -q
