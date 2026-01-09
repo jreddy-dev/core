@@ -12,17 +12,30 @@ os.makedirs(VIDEO_DIR, exist_ok=True)
 
 
 @router.post("/{experiment_id}")
-async def upload_video(experiment_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+async def upload_video(experiment_id: str, background_tasks: BackgroundTasks, file: UploadFile = File(...), consent: bool = Form(False)):
     # Save file
     video_id = str(uuid4())
     filename = f"{video_id}_{file.filename}"
     path = os.path.join(VIDEO_DIR, filename)
+    content = await file.read()
+    # optional encryption at rest
+    encrypt_flag = os.getenv('ENCRYPT_VIDEOS', '0') == '1'
+    if encrypt_flag and os.getenv('ENCRYPTION_KEY'):
+        try:
+            from cryptography.fernet import Fernet
+            key = os.getenv('ENCRYPTION_KEY').encode()
+            f = Fernet(key)
+            content = f.encrypt(content)
+            encrypted = 1
+        except Exception:
+            encrypted = 0
+    else:
+        encrypted = 0
     with open(path, "wb") as f:
-        content = await file.read()
         f.write(content)
 
     session = SessionLocal()
-    v = Video(id=video_id, experiment_id=experiment_id, filename=filename, url=path, status="uploaded")
+    v = Video(id=video_id, experiment_id=experiment_id, filename=filename, url=path, status="uploaded", consent_for_training=int(bool(consent)), encrypted=encrypted)
     session.add(v)
     session.commit()
     session.refresh(v)

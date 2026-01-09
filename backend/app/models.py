@@ -48,6 +48,8 @@ class Video(Base):
     filename = Column(String)
     url = Column(String)
     status = Column(String, default="uploaded")
+    consent_for_training = Column(Integer, default=0)
+    encrypted = Column(Integer, default=0)
 
 
 class ProcessingResult(Base):
