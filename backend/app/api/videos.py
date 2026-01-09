@@ -79,4 +79,4 @@ def get_video(video_id: str):
     session.close()
     if not v:
         raise HTTPException(status_code=404, detail="Video not found")
-    return {"id": v.id, "filename": v.filename, "status": v.status, "url": v.url}
+    return {"id": v.id, "filename": v.filename, "status": v.status, "url": v.url, "consent_for_training": bool(v.consent_for_training), "encrypted": bool(v.encrypted)}
